@@ -4,6 +4,7 @@ import json
 import logging
 from odoo import http, fields
 from odoo.http import request
+from odoo.addons.web.controllers.home import Home
 
 _logger = logging.getLogger(__name__)
 
@@ -176,8 +177,9 @@ class SmartHiveClientController(http.Controller):
             response.headers['X-Frame-Options'] = 'DENY'
             return response
         
-        # Call original login method
-        return request.env['ir.http']._dispatch()
+        # Call original login method using proper inheritance
+        home_controller = Home()
+        return home_controller.web_login(redirect=redirect, **kw)
 
     @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET'], csrf=False)
     def get_warning_data(self):
