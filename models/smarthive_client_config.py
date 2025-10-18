@@ -120,35 +120,68 @@ class SmartHiveClientConfig(models.Model):
             if method == 'GET':
                 response = requests.get(url, headers=headers, timeout=30)
             elif method == 'POST':
-                response = requests.post(url, headers=headers, json=data or {}, timeout=30)
+                # For Odoo JSON endpoints, we need to send data as JSON in the request body
+                response = requests.post(url, headers=headers, data=json.dumps(data or {}), timeout=30)
             
             response.raise_for_status()
-            return response.json() if response.content else {}
             
+            # Handle different response types
+            if response.content:
+                try:
+                    return response.json()
+                except json.JSONDecodeError:
+                    return {'success': False, 'error': 'Invalid JSON response from server'}
+            else:
+                return {'success': False, 'error': 'Empty response from server'}
+            
+        except requests.exceptions.ConnectionError as e:
+            error_msg = f"Cannot connect to server at {self.server_url}: {str(e)}"
+            _logger.error(f"Connection error: {error_msg}")
+            return {'success': False, 'error': error_msg}
+        except requests.exceptions.Timeout as e:
+            error_msg = f"Request timeout (30s) to server: {str(e)}"
+            _logger.error(f"Timeout error: {error_msg}")
+            return {'success': False, 'error': error_msg}
+        except requests.exceptions.HTTPError as e:
+            error_msg = f"HTTP error {e.response.status_code}: {str(e)}"
+            _logger.error(f"HTTP error: {error_msg}")
+            return {'success': False, 'error': error_msg}
         except requests.exceptions.RequestException as e:
-            _logger.error(f"Server request failed: {str(e)}")
-            raise UserError(_("Failed to contact SmartHive server: %s") % str(e))
+            error_msg = f"Request failed: {str(e)}"
+            _logger.error(f"Server request failed: {error_msg}")
+            return {'success': False, 'error': error_msg}
+        except Exception as e:
+            error_msg = f"Unexpected error: {str(e)}"
+            _logger.error(f"Unexpected error in server request: {error_msg}")
+            return {'success': False, 'error': error_msg}
 
     def action_test_connection(self):
         """Test connection to SmartHive server"""
         self.ensure_one()
-        try:
-            # Send heartbeat to test connection
-            result = self.send_heartbeat()
-            if result.get('success'):
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': _('Connection Successful'),
-                        'message': _('Successfully connected to SmartHive server'),
-                        'type': 'success',
-                    }
+        
+        # Validate configuration first
+        if not self.server_url:
+            raise UserError(_("Please configure the server URL first"))
+        if not self.api_key:
+            raise UserError(_("Please configure the API key first"))
+        if not self.client_id:
+            raise UserError(_("Please configure the client ID first"))
+            
+        # Send heartbeat to test connection
+        result = self.send_heartbeat()
+        if result.get('success'):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Connection Successful'),
+                    'message': _('Successfully connected to SmartHive server'),
+                    'type': 'success',
                 }
-            else:
-                raise UserError(_("Connection test failed: %s") % result.get('error', 'Unknown error'))
-        except Exception as e:
-            raise UserError(_("Connection test failed: %s") % str(e))
+            }
+        else:
+            error_message = result.get('error', 'Unknown error')
+            raise UserError(_("Connection test failed: %s") % error_message)
 
     def send_heartbeat(self):
         """Send heartbeat to server and get current status"""
