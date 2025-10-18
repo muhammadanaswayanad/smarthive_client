@@ -23,10 +23,18 @@
                   sequence="20"/>
         
         <!-- Settings Menu Item -->
+        <!-- Local action to open system settings (res.config.settings) -->
+        <record id="action_smarthive_res_config_settings" model="ir.actions.act_window">
+            <field name="name">SmartHive Client Settings</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">current</field>
+        </record>
+
         <menuitem id="menu_smarthive_client_settings" 
                   name="Settings"
                   parent="menu_smarthive_client_root"
-                  action="base.action_res_config_settings"
+                  action="action_smarthive_res_config_settings"
                   groups="base.group_system"
                   sequence="90"/>
         
