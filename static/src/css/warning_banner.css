@@ -1,0 +1,135 @@
+/* SmartHive Client Warning Banner Styles */
+
+.smarthive_warning_banner {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-bottom: 2px solid #f0ad4e !important;
+    background: linear-gradient(135deg, #fcf8e3 0%, #f9f2d7 100%) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    animation: slideDown 0.3s ease-out;
+}
+
+.smarthive_warning_banner.alert-danger {
+    background: linear-gradient(135deg, #f2dede 0%, #ebccd1 100%) !important;
+    border-bottom-color: #d9534f !important;
+    color: #a94442 !important;
+}
+
+.smarthive_warning_banner .container {
+    padding: 10px 15px;
+}
+
+.smarthive_warning_banner strong {
+    font-weight: 600;
+}
+
+.smarthive_warning_banner i.fa {
+    margin-right: 5px;
+}
+
+/* Block Screen Styles */
+.smarthive_block_screen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.smarthive_block_screen .card {
+    max-width: 500px;
+    margin: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: none;
+    animation: slideUp 0.4s ease-out;
+}
+
+.smarthive_block_screen .card-header {
+    background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%) !important;
+    border: none;
+    padding: 20px;
+}
+
+.smarthive_block_screen .card-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.smarthive_block_screen .card-body {
+    padding: 30px;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .smarthive_warning_banner .container {
+        padding: 8px 10px;
+    }
+
+    .smarthive_warning_banner {
+        font-size: 14px;
+    }
+
+    .smarthive_block_screen .card {
+        margin: 10px;
+    }
+
+    .smarthive_block_screen .card-body {
+        padding: 20px;
+    }
+}
+
+/* Integration with Odoo interface */
+.o_main_navbar+.smarthive_warning_banner {
+    top: 46px;
+    /* Adjust for Odoo navbar height */
+}
+
+body.o_web_client .smarthive_warning_banner {
+    position: relative;
+    top: 0;
+}

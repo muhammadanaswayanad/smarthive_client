@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- SmartHive Client Security Groups -->
+        <record id="group_smarthive_client_user" model="res.groups">
+            <field name="name">SmartHive Client User</field>
+            <field name="category_id" ref="base.module_category_administration"/>
+            <field name="comment">Can view SmartHive client configuration</field>
+        </record>
+        
+        <record id="group_smarthive_client_admin" model="res.groups">
+            <field name="name">SmartHive Client Admin</field>
+            <field name="category_id" ref="base.module_category_administration"/>
+            <field name="implied_ids" eval="[(4, ref('group_smarthive_client_user'))]"/>
+            <field name="comment">Can manage SmartHive client configuration</field>
+        </record>
+        
+    </data>
+</odoo>

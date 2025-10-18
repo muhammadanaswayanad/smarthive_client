@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- Warning Banner Tree View -->
+        <record id="view_smarthive_client_status_tree" model="ir.ui.view">
+            <field name="name">smarthive.client.status.tree</field>
+            <field name="model">smarthive.client.status</field>
+            <field name="arch" type="xml">
+                <tree string="SmartHive Status Log" create="false" edit="false" default_order="create_date desc">
+                    <field name="create_date"/>
+                    <field name="status_type" widget="badge"/>
+                    <field name="status" widget="badge" decoration-success="status=='success'" decoration-warning="status=='warning'" decoration-danger="status=='error'" decoration-info="status=='info'"/>
+                    <field name="message"/>
+                </tree>
+            </field>
+        </record>
+        
+        <!-- Warning Banner Form View -->
+        <record id="view_smarthive_client_status_form" model="ir.ui.view">
+            <field name="name">smarthive.client.status.form</field>
+            <field name="model">smarthive.client.status</field>
+            <field name="arch" type="xml">
+                <form string="SmartHive Status Entry" create="false" edit="false">
+                    <sheet>
+                        <group>
+                            <field name="status_type"/>
+                            <field name="status"/>
+                            <field name="create_date"/>
+                        </group>
+                        
+                        <group string="Message">
+                            <field name="message" nolabel="1"/>
+                        </group>
+                        
+                        <group string="Details" invisible="not details">
+                            <field name="details" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <!-- Warning Banner Search View -->
+        <record id="view_smarthive_client_status_search" model="ir.ui.view">
+            <field name="name">smarthive.client.status.search</field>
+            <field name="model">smarthive.client.status</field>
+            <field name="arch" type="xml">
+                <search string="Search Status Log">
+                    <field name="message"/>
+                    <separator/>
+                    <filter string="Success" name="success" domain="[('status', '=', 'success')]"/>
+                    <filter string="Warning" name="warning" domain="[('status', '=', 'warning')]"/>
+                    <filter string="Error" name="error" domain="[('status', '=', 'error')]"/>
+                    <filter string="Info" name="info" domain="[('status', '=', 'info')]"/>
+                    <separator/>
+                    <filter string="Today" name="today" domain="[('create_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Status Type" name="group_status_type" context="{'group_by': 'status_type'}"/>
+                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                        <filter string="Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <!-- Action for Status Log -->
+        <record id="action_smarthive_client_status" model="ir.actions.act_window">
+            <field name="name">SmartHive Status Log</field>
+            <field name="res_model">smarthive.client.status</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No status logs found
+                </p>
+                <p>
+                    SmartHive status logs will appear here as communications
+                    occur with the SmartHive server.
+                </p>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
