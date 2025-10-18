@@ -7,7 +7,7 @@
             <field name="name">smarthive.client.config.tree</field>
             <field name="model">smarthive.client.config</field>
             <field name="arch" type="xml">
-                                <tree string="SmartHive Client Configuration" create="false" edit="false">
+                <tree string="SmartHive Client Configuration" edit="false">
                     <field name="name"/>
                     <field name="client_id"/>
                     <field name="server_url"/>
