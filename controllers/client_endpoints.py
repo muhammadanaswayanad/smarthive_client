@@ -34,6 +34,28 @@ class SmartHiveClientController(http.Controller):
             
         return config, None
 
+
+class SmartHiveLoginController(Home):
+    
+    def _authenticate_request(self):
+        """Authenticate API request from SmartHive server"""
+        api_key = request.httprequest.headers.get('X-SmartHive-API-Key')
+        client_id = request.httprequest.headers.get('X-SmartHive-Client-ID')
+        
+        if not api_key or not client_id:
+            return False, "Missing API key or client ID"
+        
+        config = request.env[CLIENT_CONFIG_MODEL].sudo().search([
+            ('client_id', '=', client_id),
+            ('api_key', '=', api_key),
+            ('active', '=', True)
+        ], limit=1)
+        
+        if not config:
+            return False, "Invalid API credentials"
+            
+        return config, None
+
     @http.route('/smarthive_client/ping', type='json', auth='none', methods=['GET'], csrf=False)
     def ping(self):
         """Health check endpoint"""
@@ -161,26 +183,36 @@ class SmartHiveClientController(http.Controller):
             _logger.error(f"Get status error: {str(e)}")
             return {'success': False, 'error': str(e)}
 
-    @http.route('/web/login', type='http', auth='none', methods=['GET', 'POST'], csrf=False)
-    def web_login_with_check(self, redirect=None, **kw):
-        """Override login to show SmartHive warnings"""
-        # Get SmartHive config
-        config = request.env[CLIENT_CONFIG_MODEL].sudo().get_active_config()
-        
-        # If blocked, show block message
-        if config and config.is_blocked:
-            values = {
-                'error': config.block_reason or "System access is currently restricted. Please contact your administrator.",
-                'smarthive_blocked': True,
-            }
-            response = request.render('web.login', values)
-            response.headers['X-Frame-Options'] = 'DENY'
-            return response
-        
-        # Call original login method using proper inheritance
-        home_controller = Home()
-        return home_controller.web_login(redirect=redirect, **kw)
 
+class SmartHiveLoginController(Home):
+    
+    @http.route('/web/login', type='http', auth='none', methods=['GET', 'POST'], csrf=False)
+    def web_login(self, redirect=None, **kw):
+        """Override login to show SmartHive warnings"""
+        # Get SmartHive config - check if client is blocked before processing login
+        try:
+            config = request.env[CLIENT_CONFIG_MODEL].sudo().get_active_config()
+            
+            # If blocked, show block message instead of normal login
+            if config and config.is_blocked:
+                values = {
+                    'error': config.block_reason or "System access is currently restricted. Please contact your administrator.",
+                    'smarthive_blocked': True,
+                }
+                response = request.render('web.login', values)
+                response.headers['X-Frame-Options'] = 'DENY'
+                return response
+        except Exception as e:
+            # If there's an error checking SmartHive config, log it but don't block login
+            _logger.warning(f"Error checking SmartHive config during login: {str(e)}")
+        
+        # Call original login method from parent class
+        return super().web_login(redirect=redirect, **kw)
+
+
+# Separate controller for warning data
+class SmartHiveWarningController(http.Controller):
+    
     @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET'], csrf=False)
     def get_warning_data(self):
         """Get warning banner data for current user"""
