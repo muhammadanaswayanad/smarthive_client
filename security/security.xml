@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         
         <!-- SmartHive Client Security Groups -->
         <record id="group_smarthive_client_user" model="res.groups">
@@ -14,6 +14,18 @@
             <field name="category_id" ref="base.module_category_administration"/>
             <field name="implied_ids" eval="[(4, ref('group_smarthive_client_user'))]"/>
             <field name="comment">Can manage SmartHive client configuration</field>
+        </record>
+        
+        <!-- Allow system administrators full access -->
+        <record id="rule_smarthive_config_system_admin" model="ir.rule">
+            <field name="name">SmartHive Config: System Admin Full Access</field>
+            <field name="model_id" ref="model_smarthive_client_config"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
         </record>
         
     </data>
