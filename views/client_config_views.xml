@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <tree string="SmartHive Client Configuration" edit="false">
                     <field name="name"/>
-                    <field name="local_admin_mode" widget="boolean_toggle"/>
+                    <field name="local_admin_mode" widget="boolean_toggle" readonly="1"/>
                     <field name="client_id" invisible="local_admin_mode"/>
                     <field name="server_url" invisible="local_admin_mode"/>
                     <field name="is_blocked" widget="boolean_toggle"/>
@@ -36,6 +36,10 @@
                         <button name="action_set_local_warning" string="Set Warning" type="object" class="btn-warning" invisible="not local_admin_mode" groups="base.group_system"/>
                     </header>
                     <sheet>
+                        <!-- Invisible fields for visibility conditions -->
+                        <field name="is_blocked" invisible="1"/>
+                        <field name="show_warning" invisible="1"/>
+                        
                         <widget name="web_ribbon" title="BLOCKED" bg_color="bg-danger" invisible="not is_blocked"/>
                         <widget name="web_ribbon" title="WARNING ACTIVE" bg_color="bg-warning" invisible="not show_warning or is_blocked"/>
                         <widget name="web_ribbon" title="LOCAL ADMIN" bg_color="bg-info" invisible="not local_admin_mode"/>
@@ -48,8 +52,9 @@
                         
                         <group>
                             <group string="Configuration Mode">
-                                <field name="local_admin_mode" groups="base.group_system"/>
-                                <field name="local_admin_user_id" invisible="not local_admin_mode" groups="base.group_system"/>
+                                <field name="can_edit_local_admin" invisible="1"/>
+                                <field name="local_admin_mode" readonly="not can_edit_local_admin"/>
+                                <field name="local_admin_user_id" invisible="not local_admin_mode" readonly="not can_edit_local_admin"/>
                                 <field name="active"/>
                             </group>
                             <group string="Server Configuration" invisible="local_admin_mode">

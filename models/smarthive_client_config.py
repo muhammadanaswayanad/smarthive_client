@@ -107,6 +107,21 @@ class SmartHiveClientConfig(models.Model):
         string='Local Admin User',
         help='User who can manage local warnings and blocks'
     )
+    
+    # Computed fields for view logic
+    can_edit_local_admin = fields.Boolean(
+        compute='_compute_can_edit_local_admin',
+        help='Whether current user can edit local admin settings'
+    )
+    
+    @api.depends_context('uid')
+    def _compute_can_edit_local_admin(self):
+        """Compute if current user can edit local admin settings"""
+        for record in self:
+            record.can_edit_local_admin = (
+                self.env.user.has_group('base.group_system') or 
+                self.env.user.id == 1
+            )
 
     @api.constrains('server_url')
     def _check_server_url_format(self):
@@ -386,3 +401,10 @@ class SmartHiveClientConfig(models.Model):
             return True
             
         raise UserError(_('Only system administrators can perform this action'))
+    
+    def write(self, vals):
+        """Override write to check permissions for local admin mode changes"""
+        if 'local_admin_mode' in vals or 'local_admin_user_id' in vals:
+            if not (self.env.user.has_group('base.group_system') or self.env.user.id == 1):
+                raise UserError(_('Only system administrators can modify local admin settings'))
+        return super().write(vals)
