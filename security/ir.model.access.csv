@@ -3,3 +3,4 @@ access_smarthive_client_config_user,smarthive.client.config user,model_smarthive
 access_smarthive_client_config_admin,smarthive.client.config admin,model_smarthive_client_config,group_smarthive_client_admin,1,1,1,1
 access_smarthive_client_status_user,smarthive.client.status user,model_smarthive_client_status,group_smarthive_client_user,1,0,0,0
 access_smarthive_client_status_admin,smarthive.client.status admin,model_smarthive_client_status,group_smarthive_client_admin,1,1,1,0
+access_smarthive_warning_wizard_admin,smarthive.warning.wizard admin,model_smarthive_warning_wizard,base.group_system,1,1,1,1

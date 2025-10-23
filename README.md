@@ -6,12 +6,21 @@ SmartHive Client is an Odoo 17 CE addon that enables your instance to be managed
 
 ## Features
 
+### Local Administration Mode
+- **Local Management**: Direct control from within your Odoo instance
+- **Warning Banners**: Create custom payment reminders and system notifications
+- **Access Control**: Block/unblock system access instantly
+- **Admin Controls**: Super admin and designated users can manage all features
+- **No Server Required**: Works completely offline/standalone
+- **Status Logging**: Track all local admin activities
+
+### Server-Based Mode  
 - **Remote Management**: Receive commands and status updates from SmartHive server
-- **Warning Banners**: Display payment reminders and system notifications
+- **Warning Banners**: Display payment reminders and system notifications from server
 - **Access Control**: Block/unblock system access remotely
 - **Heartbeat Monitoring**: Regular status reporting to server
 - **Secure Communication**: API key based authentication
-- **Payment Alerts**: Show outstanding payment information
+- **Payment Alerts**: Show outstanding payment information from server
 - **Status Logging**: Track all server communications
 
 ## Installation
@@ -23,16 +32,34 @@ SmartHive Client is an Odoo 17 CE addon that enables your instance to be managed
 
 ## Configuration
 
-### Initial Setup
+### Local Administration Mode (NEW)
+
+For standalone operation without a SmartHive server:
 
 1. Go to **SmartHive Client > Configuration**
 2. Create a new configuration record with:
+   - **Local Admin Mode**: Enable this option
+   - **Local Admin User**: Select the user who can manage warnings/blocks (optional - defaults to system admin)
+   - Leave server connection fields empty
+
+3. Use the buttons in the form header to:
+   - **Block Access**: Prevent all users (except admins) from using the system
+   - **Unblock Access**: Restore normal access
+   - **Set Warning**: Configure warning banners for users
+
+### Server-Based Setup
+
+For remote management via SmartHive server:
+
+1. Go to **SmartHive Client > Configuration**
+2. Leave **Local Admin Mode** disabled
+3. Create a new configuration record with:
    - **Server URL**: Your SmartHive server URL (e.g., `https://server.example.com`)
    - **Client ID**: Unique identifier (must match server configuration)
    - **API Key**: Secure key for authentication (must match server)
    - **Heartbeat Interval**: How often to contact server (default: 15 minutes)
 
-### Server-Side Setup
+### Server-Side Setup (For Server Mode)
 
 Ensure the corresponding client record is created on your SmartHive server with:
 - Matching Client ID
@@ -51,14 +78,16 @@ Once configured, the addon will automatically:
 
 ### Manual Operations
 
-#### Test Connection
-- Use "Test Connection" button in configuration to verify server communication
+#### Local Admin Mode
+- **Block Access**: Immediately block all user access except administrators
+- **Unblock Access**: Restore normal system access for all users
+- **Set Warning**: Configure custom warning banners with payment information
+- **View Logs**: Check **SmartHive Client > Status Log** for all activities
 
-#### Send Heartbeat
-- Use "Send Heartbeat" to manually sync with server
-
-#### View Logs
-- Check **SmartHive Client > Status Log** for communication history
+#### Server Mode
+- **Test Connection**: Verify server communication
+- **Send Heartbeat**: Manually sync with server
+- **View Logs**: Check **SmartHive Client > Status Log** for communication history
 
 ## Warning System
 

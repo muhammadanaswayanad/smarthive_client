@@ -9,12 +9,13 @@
             <field name="arch" type="xml">
                 <tree string="SmartHive Client Configuration" edit="false">
                     <field name="name"/>
-                    <field name="client_id"/>
-                    <field name="server_url"/>
+                    <field name="local_admin_mode" widget="boolean_toggle"/>
+                    <field name="client_id" invisible="local_admin_mode"/>
+                    <field name="server_url" invisible="local_admin_mode"/>
                     <field name="is_blocked" widget="boolean_toggle"/>
                     <field name="show_warning" widget="boolean_toggle"/>
                     <field name="payment_status" widget="badge" decoration-success="payment_status=='paid'" decoration-warning="payment_status=='pending'" decoration-danger="payment_status in ['overdue','blocked']"/>
-                    <field name="last_server_contact"/>
+                    <field name="last_server_contact" invisible="local_admin_mode"/>
                     <field name="active" widget="boolean_toggle"/>
                 </tree>
             </field>
@@ -27,12 +28,17 @@
             <field name="arch" type="xml">
                 <form string="SmartHive Client Configuration">
                     <header>
-                        <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight"/>
-                        <button name="send_heartbeat" string="Send Heartbeat" type="object"/>
+                        <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight" invisible="local_admin_mode"/>
+                        <button name="send_heartbeat" string="Send Heartbeat" type="object" invisible="local_admin_mode"/>
+                        <!-- Local Admin Buttons -->
+                        <button name="action_local_block" string="Block Access" type="object" class="btn-danger" invisible="not local_admin_mode or is_blocked" groups="base.group_system"/>
+                        <button name="action_local_unblock" string="Unblock Access" type="object" class="btn-success" invisible="not local_admin_mode or not is_blocked" groups="base.group_system"/>
+                        <button name="action_set_local_warning" string="Set Warning" type="object" class="btn-warning" invisible="not local_admin_mode" groups="base.group_system"/>
                     </header>
                     <sheet>
                         <widget name="web_ribbon" title="BLOCKED" bg_color="bg-danger" invisible="not is_blocked"/>
-                        <widget name="web_ribbon" title="WARNING ACTIVE" bg_color="bg-warning" invisible="not show_warning"/>
+                        <widget name="web_ribbon" title="WARNING ACTIVE" bg_color="bg-warning" invisible="not show_warning or is_blocked"/>
+                        <widget name="web_ribbon" title="LOCAL ADMIN" bg_color="bg-info" invisible="not local_admin_mode"/>
                         
                         <div class="oe_title">
                             <h1>
@@ -41,11 +47,15 @@
                         </div>
                         
                         <group>
-                            <group string="Server Configuration">
+                            <group string="Configuration Mode">
+                                <field name="local_admin_mode" groups="base.group_system"/>
+                                <field name="local_admin_user_id" invisible="not local_admin_mode" groups="base.group_system"/>
+                                <field name="active"/>
+                            </group>
+                            <group string="Server Configuration" invisible="local_admin_mode">
                                 <field name="server_url"/>
                                 <field name="client_id"/>
                                 <field name="api_key" password="True"/>
-                                <field name="active"/>
                             </group>
                             <group string="Status">
                                 <field name="is_blocked"/>

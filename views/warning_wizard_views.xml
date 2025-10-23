@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- Warning Wizard Form View -->
+        <record id="view_smarthive_warning_wizard_form" model="ir.ui.view">
+            <field name="name">smarthive.warning.wizard.form</field>
+            <field name="model">smarthive.warning.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Set Warning Banner">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Configure Warning Banner</h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Warning Settings">
+                                <field name="config_id" invisible="1"/>
+                                <field name="show_warning"/>
+                                <field name="warning_message" invisible="not show_warning" placeholder="Enter warning message for users..."/>
+                            </group>
+                            <group string="Payment Information" invisible="not show_warning">
+                                <field name="payment_status"/>
+                                <field name="outstanding_amount" invisible="payment_status in ['paid']"/>
+                            </group>
+                        </group>
+                        
+                        <div class="alert alert-info" role="alert" invisible="not show_warning">
+                            <strong>Preview:</strong>
+                            <br/>
+                            <span invisible="not warning_message"><field name="warning_message" readonly="1"/></span>
+                            <span invisible="warning_message">System notification from administrator</span>
+                            <span invisible="not outstanding_amount">
+                                <br/><strong>Outstanding Amount: <field name="outstanding_amount" readonly="1"/></strong>
+                            </span>
+                        </div>
+                    </sheet>
+                    
+                    <footer>
+                        <button name="action_apply_warning" string="Apply" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

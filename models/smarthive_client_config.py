@@ -94,6 +94,19 @@ class SmartHiveClientConfig(models.Model):
         default=True,
         help='Automatically report status to server'
     )
+    
+    # Local Administration Mode
+    local_admin_mode = fields.Boolean(
+        string='Local Admin Mode',
+        default=False,
+        help='Enable local administration without server connection'
+    )
+    
+    local_admin_user_id = fields.Many2one(
+        'res.users',
+        string='Local Admin User',
+        help='User who can manage local warnings and blocks'
+    )
 
     @api.constrains('server_url')
     def _check_server_url_format(self):
@@ -246,13 +259,14 @@ class SmartHiveClientConfig(models.Model):
         """Cron job to send regular heartbeat to server"""
         configs = self.search([
             ('active', '=', True),
-            ('server_url', '!=', False),
-            ('client_id', '!=', False),
-            ('api_key', '!=', False),
         ])
         
         for config in configs:
             try:
+                # Skip heartbeat if in local admin mode or server not configured
+                if config.local_admin_mode or not all([config.server_url, config.client_id, config.api_key]):
+                    continue
+                    
                 # Check if it's time for heartbeat
                 if (not config.last_server_contact or 
                     (fields.Datetime.now() - config.last_server_contact).total_seconds() >= config.heartbeat_interval * 60):
@@ -282,4 +296,93 @@ class SmartHiveClientConfig(models.Model):
             'payment_status': self.payment_status,
             'outstanding_amount': self.outstanding_amount,
             'block_reason': self.block_reason if self.is_blocked else None,
+            'local_admin_mode': self.local_admin_mode,
         }
+    
+    # Local Administration Methods
+    def action_local_block(self):
+        """Block client access locally (admin only)"""
+        self.ensure_one()
+        self._check_local_admin_access()
+        
+        self.write({
+            'is_blocked': True,
+            'block_reason': 'Access blocked by local administrator',
+        })
+        
+        # Log the block action
+        self.env['smarthive.client.status'].create({
+            'status_type': 'block',
+            'status': 'warning', 
+            'message': f'Local admin blocked client access',
+        })
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Access Blocked'),
+                'message': _('Client access has been blocked'),
+                'type': 'warning',
+            }
+        }
+    
+    def action_local_unblock(self):
+        """Unblock client access locally (admin only)"""
+        self.ensure_one()
+        self._check_local_admin_access()
+        
+        self.write({
+            'is_blocked': False,
+            'block_reason': '',
+        })
+        
+        # Log the unblock action
+        self.env['smarthive.client.status'].create({
+            'status_type': 'block',
+            'status': 'success',
+            'message': 'Local admin unblocked client access',
+        })
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Access Unblocked'),
+                'message': _('Client access has been restored'),
+                'type': 'success',
+            }
+        }
+    
+    def action_set_local_warning(self):
+        """Set warning banner locally (admin only)"""
+        self.ensure_one()
+        self._check_local_admin_access()
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Set Warning Banner'),
+            'res_model': 'smarthive.warning.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_config_id': self.id,
+                'default_warning_message': self.warning_message,
+                'default_show_warning': self.show_warning,
+                'default_payment_status': self.payment_status,
+                'default_outstanding_amount': self.outstanding_amount,
+            },
+        }
+    
+    def _check_local_admin_access(self):
+        """Check if current user can perform local admin actions"""
+        if not self.local_admin_mode:
+            raise UserError(_('Local administration mode is not enabled'))
+            
+        # Allow superuser or configured local admin
+        if (self.env.user.id == 1 or  # Superuser
+            (self.local_admin_user_id and self.env.user.id == self.local_admin_user_id.id) or
+            self.env.user.has_group('base.group_system')):
+            return True
+            
+        raise UserError(_('Only system administrators can perform this action'))

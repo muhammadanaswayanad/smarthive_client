@@ -193,6 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Remove existing banners first
+                    const existingBanner = document.querySelector('.smarthive_warning_banner');
+                    if (existingBanner) {
+                        existingBanner.remove();
+                    }
+                    
                     if (data.show_warning) {
                         showSmartHiveWarning(data);
                     }

@@ -215,7 +215,7 @@ class SmartHiveWarningController(http.Controller):
     
     @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET'], csrf=False)
     def get_warning_data(self):
-        """Get warning banner data for current user"""
+        \"\"\"Get warning banner data for current user\"\"\"
         try:
             config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
             if not config:
@@ -224,5 +224,120 @@ class SmartHiveWarningController(http.Controller):
             return config.get_warning_data() or {'show_warning': False}
             
         except Exception as e:
-            _logger.error(f"Get warning data error: {str(e)}")
+            _logger.error(f\"Get warning data error: {str(e)}\")
             return {'show_warning': False, 'error': str(e)}
+
+
+class SmartHiveLocalAdminController(http.Controller):
+    \"\"\"Local administration endpoints for super admin\"\"\"
+    
+    def _check_admin_access(self):
+        \"\"\"Check if current user is admin\"\"\"
+        if not request.env.user.has_group('base.group_system'):
+            return False, \"Access denied: Admin privileges required\"
+        return True, None
+    
+    @http.route('/smarthive_client/local/block', type='json', auth='user', methods=['POST'], csrf=False)
+    def local_block_client(self):
+        \"\"\"Block client access locally (admin only)\"\"\"
+        try:
+            is_admin, error = self._check_admin_access()
+            if not is_admin:
+                return {'success': False, 'error': error}
+            
+            config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
+            if not config:
+                return {'success': False, 'error': 'No active configuration found'}
+            
+            if not config.local_admin_mode:
+                return {'success': False, 'error': 'Local admin mode not enabled'}
+            
+            data = request.jsonrequest or {}
+            
+            config.sudo().write({
+                'is_blocked': True,
+                'block_reason': data.get('block_reason', 'Access blocked by local administrator'),
+            })
+            
+            # Log the block action
+            request.env[CLIENT_STATUS_MODEL].sudo().create({
+                'status_type': 'block',
+                'status': 'warning',
+                'message': 'Local admin blocked client access',
+            })
+            
+            return {'success': True}
+            
+        except Exception as e:
+            _logger.error(f\"Local block client error: {str(e)}\")
+            return {'success': False, 'error': str(e)}
+    
+    @http.route('/smarthive_client/local/unblock', type='json', auth='user', methods=['POST'], csrf=False)
+    def local_unblock_client(self):
+        \"\"\"Unblock client access locally (admin only)\"\"\"
+        try:
+            is_admin, error = self._check_admin_access()
+            if not is_admin:
+                return {'success': False, 'error': error}
+            
+            config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
+            if not config:
+                return {'success': False, 'error': 'No active configuration found'}
+            
+            if not config.local_admin_mode:
+                return {'success': False, 'error': 'Local admin mode not enabled'}
+            
+            config.sudo().write({
+                'is_blocked': False,
+                'block_reason': '',
+            })
+            
+            # Log the unblock action
+            request.env[CLIENT_STATUS_MODEL].sudo().create({
+                'status_type': 'block',
+                'status': 'success',
+                'message': 'Local admin unblocked client access',
+            })
+            
+            return {'success': True}
+            
+        except Exception as e:
+            _logger.error(f\"Local unblock client error: {str(e)}\")
+            return {'success': False, 'error': str(e)}
+    
+    @http.route('/smarthive_client/local/warning', type='json', auth='user', methods=['POST'], csrf=False)
+    def local_set_warning(self):
+        \"\"\"Set warning banner locally (admin only)\"\"\"
+        try:
+            is_admin, error = self._check_admin_access()
+            if not is_admin:
+                return {'success': False, 'error': error}
+            
+            config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
+            if not config:
+                return {'success': False, 'error': 'No active configuration found'}
+            
+            if not config.local_admin_mode:
+                return {'success': False, 'error': 'Local admin mode not enabled'}
+            
+            data = request.jsonrequest or {}
+            
+            config.sudo().write({
+                'show_warning': data.get('show_warning', False),
+                'warning_message': data.get('warning_message', ''),
+                'payment_status': data.get('payment_status', 'paid'),
+                'outstanding_amount': data.get('outstanding_amount', 0.0),
+            })
+            
+            # Log the warning action
+            request.env[CLIENT_STATUS_MODEL].sudo().create({
+                'status_type': 'warning',
+                'status': 'info',
+                'message': 'Local admin updated warning configuration',
+            })
+            
+            return {'success': True}
+            
+        except Exception as e:
+            _logger.error(f\"Local set warning error: {str(e)}\")
+            return {'success': False, 'error': str(e)}
