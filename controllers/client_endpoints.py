@@ -215,7 +215,7 @@ class SmartHiveWarningController(http.Controller):
     
     @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET'], csrf=False)
     def get_warning_data(self):
-        \"\"\"Get warning banner data for current user\"\"\"
+        """Get warning banner data for current user"""
         try:
             config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
             if not config:
@@ -224,22 +224,22 @@ class SmartHiveWarningController(http.Controller):
             return config.get_warning_data() or {'show_warning': False}
             
         except Exception as e:
-            _logger.error(f\"Get warning data error: {str(e)}\")
+            _logger.error(f"Get warning data error: {str(e)}")
             return {'show_warning': False, 'error': str(e)}
 
 
 class SmartHiveLocalAdminController(http.Controller):
-    \"\"\"Local administration endpoints for super admin\"\"\"
+    """Local administration endpoints for super admin"""
     
     def _check_admin_access(self):
-        \"\"\"Check if current user is admin\"\"\"
+        """Check if current user is admin"""
         if not request.env.user.has_group('base.group_system'):
-            return False, \"Access denied: Admin privileges required\"
+            return False, "Access denied: Admin privileges required"
         return True, None
     
     @http.route('/smarthive_client/local/block', type='json', auth='user', methods=['POST'], csrf=False)
     def local_block_client(self):
-        \"\"\"Block client access locally (admin only)\"\"\"
+        """Block client access locally (admin only)"""
         try:
             is_admin, error = self._check_admin_access()
             if not is_admin:
@@ -269,12 +269,12 @@ class SmartHiveLocalAdminController(http.Controller):
             return {'success': True}
             
         except Exception as e:
-            _logger.error(f\"Local block client error: {str(e)}\")
+            _logger.error(f"Local block client error: {str(e)}")
             return {'success': False, 'error': str(e)}
     
     @http.route('/smarthive_client/local/unblock', type='json', auth='user', methods=['POST'], csrf=False)
     def local_unblock_client(self):
-        \"\"\"Unblock client access locally (admin only)\"\"\"
+        """Unblock client access locally (admin only)"""
         try:
             is_admin, error = self._check_admin_access()
             if not is_admin:
@@ -302,12 +302,12 @@ class SmartHiveLocalAdminController(http.Controller):
             return {'success': True}
             
         except Exception as e:
-            _logger.error(f\"Local unblock client error: {str(e)}\")
+            _logger.error(f"Local unblock client error: {str(e)}")
             return {'success': False, 'error': str(e)}
     
     @http.route('/smarthive_client/local/warning', type='json', auth='user', methods=['POST'], csrf=False)
     def local_set_warning(self):
-        \"\"\"Set warning banner locally (admin only)\"\"\"
+        """Set warning banner locally (admin only)"""
         try:
             is_admin, error = self._check_admin_access()
             if not is_admin:
@@ -339,5 +339,5 @@ class SmartHiveLocalAdminController(http.Controller):
             return {'success': True}
             
         except Exception as e:
-            _logger.error(f\"Local set warning error: {str(e)}\")
+            _logger.error(f"Local set warning error: {str(e)}")
             return {'success': False, 'error': str(e)}
