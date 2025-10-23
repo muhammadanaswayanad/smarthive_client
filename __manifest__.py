@@ -3,7 +3,7 @@
     'version': '17.0.1.0.0',
     'category': 'Administration',
     'summary': 'SmartHive client addon for remote management and payment monitoring',
-    'description': \"\"\"
+    'description': """
 SmartHive Client
 ================
 
@@ -20,7 +20,7 @@ Key Features:
 * Heartbeat monitoring
 
 Works standalone in local admin mode or with SmartHive server addon on Odoo 18 EE.
-    \"\"\",
+    """,
     'author': 'SmartHive',
     'website': 'https://www.smarthive.com',
     'license': 'LGPL-3',
