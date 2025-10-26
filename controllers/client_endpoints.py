@@ -34,7 +34,8 @@ class SmartHiveClientController(http.Controller):
         return config, None
 
 
-class SmartHiveLoginController(Home):
+class SmartHiveServerController(http.Controller):
+    """Controller for server-to-client API endpoints"""
     
     def _authenticate_request(self):
         """Authenticate API request from SmartHive server"""
