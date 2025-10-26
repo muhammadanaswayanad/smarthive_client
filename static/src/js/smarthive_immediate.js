@@ -34,17 +34,33 @@
     }
 
     function handleWarningData(data) {
+        console.log('Processing warning data:', JSON.stringify(data));
+
         // Remove any existing warnings first
         removeExistingWarnings();
 
-        if (data.show_warning) {
-            console.log('Creating warning banner...');
-            createWarningBanner(data);
-        }
+        // Force show warnings for testing (remove this line in production)
+        if (data && (data.show_warning || data.block_reason || data.message || data.outstanding_amount)) {
+            console.log('Detected warning conditions - forcing display');
 
-        if (data.block_reason) {
-            console.log('Creating block screen...');
-            createBlockScreen(data);
+            // Create test data if needed
+            const testData = {
+                show_warning: true,
+                message: data.message || data.warning_message || 'Payment overdue - please contact administrator',
+                outstanding_amount: data.outstanding_amount || '30,000.00',
+                payment_status: data.payment_status || 'overdue',
+                block_reason: data.block_reason
+            };
+
+            if (testData.block_reason) {
+                console.log('Creating block screen...');
+                createBlockScreen(testData);
+            } else {
+                console.log('Creating warning banner...');
+                createWarningBanner(testData);
+            }
+        } else {
+            console.log('No warning conditions detected');
         }
     }
 
@@ -162,7 +178,26 @@
         // Expose for testing
         window.SmartHiveTest = {
             check: checkWarnings,
-            remove: removeExistingWarnings
+            remove: removeExistingWarnings,
+            forceWarning: function () {
+                console.log('Forcing warning display for testing...');
+                const testData = {
+                    show_warning: true,
+                    message: 'TESTING: Payment overdue - please contact administrator',
+                    outstanding_amount: '30,000.00',
+                    payment_status: 'overdue'
+                };
+                handleWarningData(testData);
+            },
+            forceBlock: function () {
+                console.log('Forcing block screen for testing...');
+                const testData = {
+                    show_warning: true,
+                    block_reason: 'TESTING: Access blocked by local administrator',
+                    local_admin_mode: true
+                };
+                handleWarningData(testData);
+            }
         };
 
         console.log('SmartHive warning system initialized');

@@ -302,11 +302,12 @@ class SmartHiveClientConfig(models.Model):
 
     def get_warning_data(self):
         """Get current warning data for display"""
-        if not self.show_warning:
+        # Show warnings if client is blocked OR if warning banner is enabled
+        if not (self.show_warning or self.is_blocked):
             return None
             
         return {
-            'show_warning': True,
+            'show_warning': self.show_warning or self.is_blocked,
             'message': self.warning_message or 'System notification from administrator',
             'payment_status': self.payment_status,
             'outstanding_amount': self.outstanding_amount,
