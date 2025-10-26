@@ -4,7 +4,6 @@ import json
 import logging
 from odoo import http, fields
 from odoo.http import request
-from odoo.addons.web.controllers.home import Home
 
 _logger = logging.getLogger(__name__)
 
@@ -182,32 +181,6 @@ class SmartHiveLoginController(Home):
         except Exception as e:
             _logger.error(f"Get status error: {str(e)}")
             return {'success': False, 'error': str(e)}
-
-
-class SmartHiveLoginController(Home):
-    
-    @http.route('/web/login', type='http', auth='none', methods=['GET', 'POST'], csrf=False)
-    def web_login(self, redirect=None, **kw):
-        """Override login to show SmartHive warnings"""
-        # Get SmartHive config - check if client is blocked before processing login
-        try:
-            config = request.env[CLIENT_CONFIG_MODEL].sudo().get_active_config()
-            
-            # If blocked, show block message instead of normal login
-            if config and config.is_blocked:
-                values = {
-                    'error': config.block_reason or "System access is currently restricted. Please contact your administrator.",
-                    'smarthive_blocked': True,
-                }
-                response = request.render('web.login', values)
-                response.headers['X-Frame-Options'] = 'DENY'
-                return response
-        except Exception as e:
-            # If there's an error checking SmartHive config, log it but don't block login
-            _logger.warning(f"Error checking SmartHive config during login: {str(e)}")
-        
-        # Call original login method from parent class
-        return super().web_login(redirect=redirect, **kw)
 
 
 # Separate controller for warning data

@@ -24,13 +24,15 @@ Works standalone in local admin mode or with SmartHive server addon on Odoo 18 E
     'author': 'SmartHive',
     'website': 'https://www.smarthive.com',
     'license': 'LGPL-3',
-    'depends': ['base', 'web', 'mail'],
+    'depends': ['base', 'web', 'mail', 'crm'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
         'views/client_config_views.xml',
         'views/warning_wizard_views.xml',
+        'views/crm_warning_wizard_views.xml',
+        'views/crm_integration_views.xml',
         'views/warning_banner_views.xml',
         'views/menu_views.xml',
         'templates/warning_banner_templates.xml',
@@ -38,6 +40,7 @@ Works standalone in local admin mode or with SmartHive server addon on Odoo 18 E
     'assets': {
         'web.assets_backend': [
             'smarthive_client/static/src/js/warning_banner.js',
+            'smarthive_client/static/src/js/crm_warning_service.js',
             'smarthive_client/static/src/css/warning_banner.css',
         ],
         'web.assets_frontend': [
