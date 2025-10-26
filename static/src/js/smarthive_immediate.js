@@ -26,7 +26,15 @@
             })
             .then(data => {
                 console.log('Warning data:', data);
-                handleWarningData(data);
+
+                // Handle Odoo JSON-RPC response format
+                let warningData = data;
+                if (data.result) {
+                    warningData = data.result;
+                    console.log('Extracted result:', warningData);
+                }
+
+                handleWarningData(warningData);
             })
             .catch(error => {
                 console.error('Warning check failed:', error);
@@ -39,7 +47,7 @@
         // Remove any existing warnings first
         removeExistingWarnings();
 
-        // Force show warnings for testing (remove this line in production)
+        // Check if we have any warning conditions
         if (data && (data.show_warning || data.block_reason || data.message || data.outstanding_amount)) {
             console.log('Detected warning conditions - forcing display');
 
@@ -52,13 +60,19 @@
                 block_reason: data.block_reason
             };
 
+            console.log('Test data created:', JSON.stringify(testData));
+
+            // For now, always show warning banner instead of block screen for better UX
+            // Users can still work but see the warning
             if (testData.block_reason) {
-                console.log('Creating block screen...');
-                createBlockScreen(testData);
-            } else {
-                console.log('Creating warning banner...');
-                createWarningBanner(testData);
+                console.log('Block reason detected, but showing warning banner instead');
+                // Modify message to include block info
+                testData.message = `${testData.message || 'System notice'} - ${testData.block_reason}`;
+                testData.payment_status = 'blocked';
             }
+
+            console.log('Creating warning banner...');
+            createWarningBanner(testData);
         } else {
             console.log('No warning conditions detected');
         }
@@ -73,33 +87,54 @@
     }
 
     function createWarningBanner(data) {
+        console.log('Creating warning banner with data:', JSON.stringify(data));
+
+        // Remove any existing banner first
+        const existingBanner = document.querySelector('.smarthive-immediate-banner');
+        if (existingBanner) {
+            console.log('Removing existing banner');
+            existingBanner.remove();
+        }
+
         const banner = document.createElement('div');
         banner.className = 'smarthive-immediate-banner';
+
+        // Make the banner more prominent for blocked status
+        const isBlocked = data.payment_status === 'blocked' || data.block_reason;
+        const backgroundColor = isBlocked ?
+            'linear-gradient(135deg, #f2dede 0%, #ebccd1 100%)' :
+            'linear-gradient(135deg, #fcf8e3 0%, #f9f2d7 100%)';
+        const borderColor = isBlocked ? '#d9534f' : '#f0ad4e';
+        const textColor = isBlocked ? '#a94442' : '#856404';
+
         banner.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 10000;
-            background: linear-gradient(135deg, #fcf8e3 0%, #f9f2d7 100%);
-            border-bottom: 3px solid #f0ad4e;
+            background: ${backgroundColor};
+            border-bottom: 3px solid ${borderColor};
             padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            animation: slideDown 0.3s ease-out;
         `;
 
+        const warningIcon = isBlocked ? '🚫' : '⚠️';
+
         banner.innerHTML = `
-            <div style="color: #856404; margin-right: 15px; font-size: 1.2em;">⚠️</div>
-            <div style="flex-grow: 1; color: #856404;">
+            <div style="color: ${textColor}; margin-right: 15px; font-size: 1.2em;">${warningIcon}</div>
+            <div style="flex-grow: 1; color: ${textColor};">
                 <strong>System Notice:</strong> ${data.message || 'Please check your account status.'}
                 ${data.outstanding_amount ? `<br/><strong>Outstanding Amount: ${data.outstanding_amount}</strong>` : ''}
             </div>
             <button onclick="this.parentElement.remove()" style="
                 background: none;
                 border: none;
-                color: #856404;
+                color: ${textColor};
                 font-size: 1.5em;
                 cursor: pointer;
                 padding: 0;
@@ -107,8 +142,29 @@
             ">×</button>
         `;
 
+        console.log('Inserting banner into DOM...');
         document.body.insertBefore(banner, document.body.firstChild);
-        console.log('Warning banner created and displayed');
+
+        // Add animation CSS if not already present
+        if (!document.querySelector('#smarthive-banner-styles')) {
+            const style = document.createElement('style');
+            style.id = 'smarthive-banner-styles';
+            style.textContent = `
+                @keyframes slideDown {
+                    from { transform: translateY(-100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        console.log('Warning banner created and displayed successfully');
+
+        // Verify banner is in DOM
+        setTimeout(() => {
+            const checkBanner = document.querySelector('.smarthive-immediate-banner');
+            console.log('Banner verification:', checkBanner ? 'Found in DOM' : 'NOT FOUND');
+        }, 100);
     }
 
     function createBlockScreen(data) {
