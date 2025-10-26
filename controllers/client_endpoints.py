@@ -191,7 +191,12 @@ class SmartHiveWarningController(http.Controller):
     def get_warning_data(self):
         """Get warning banner data for current user"""
         try:
-            config = request.env[CLIENT_CONFIG_MODEL].get_active_config()
+            # Use sudo() to bypass security restrictions for reading warning data
+            # This is safe because we're only reading warning information, not sensitive config
+            config = request.env[CLIENT_CONFIG_MODEL].sudo().search([
+                ('active', '=', True)
+            ], limit=1)
+            
             if not config:
                 return {'show_warning': False}
             
