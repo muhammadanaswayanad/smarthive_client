@@ -28,6 +28,7 @@ Works standalone in local admin mode or with SmartHive server addon on Odoo 18 E
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/default_admin_assignment.xml',
         'data/ir_cron_data.xml',
         'views/client_config_views.xml',
         'views/warning_wizard_views.xml',

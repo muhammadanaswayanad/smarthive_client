@@ -28,5 +28,17 @@
             <field name="perm_unlink" eval="1"/>
         </record>
         
+        <!-- Allow SmartHive Client Admins full access -->
+        <record id="rule_smarthive_config_client_admin" model="ir.rule">
+            <field name="name">SmartHive Config: Client Admin Full Access</field>
+            <field name="model_id" ref="model_smarthive_client_config"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_smarthive_client_admin'))]"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+        
     </data>
 </odoo>

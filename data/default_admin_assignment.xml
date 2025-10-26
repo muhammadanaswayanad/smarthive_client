@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Assign admin users to SmartHive Client Admin group -->
+        <function model="res.users" name="write">
+            <value eval="[ref('base.user_admin')]"/>
+            <value eval="{'groups_id': [(4, ref('smarthive_client.group_smarthive_client_admin'))]}"/>
+        </function>
+        
+        <!-- Also assign any existing superuser to the group -->
+        <record id="assign_superuser_to_smarthive_admin" model="ir.actions.server">
+            <field name="name">Assign Superuser to SmartHive Admin</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="state">code</field>
+            <field name="code">
+# Find all system administrators and assign them to SmartHive Client Admin group
+admin_users = env['res.users'].search([('id', '>', 1), '|', ('groups_id', 'in', [env.ref('base.group_system').id]), ('groups_id', 'in', [env.ref('base.group_erp_manager').id])])
+smarthive_admin_group = env.ref('smarthive_client.group_smarthive_client_admin')
+for user in admin_users:
+    user.groups_id = [(4, smarthive_admin_group.id)]
+            </field>
+        </record>
+        
+    </data>
+</odoo>
