@@ -187,7 +187,7 @@ class SmartHiveServerController(http.Controller):
 # Separate controller for warning data
 class SmartHiveWarningController(http.Controller):
     
-    @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET'], csrf=False)
+    @http.route('/smarthive_client/warning_data', type='json', auth='user', methods=['GET', 'POST'], csrf=False)
     def get_warning_data(self):
         """Get warning banner data for current user"""
         try:

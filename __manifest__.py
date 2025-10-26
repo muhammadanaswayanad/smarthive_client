@@ -40,6 +40,8 @@ Works standalone in local admin mode or with SmartHive server addon on Odoo 18 E
     ],
     'assets': {
         'web.assets_backend': [
+            'smarthive_client/static/src/js/smarthive_immediate.js',
+            'smarthive_client/static/src/js/smarthive_warning_global.js',
             'smarthive_client/static/src/js/warning_banner.js',
             'smarthive_client/static/src/js/crm_warning_service.js',
             'smarthive_client/static/src/css/warning_banner.css',
