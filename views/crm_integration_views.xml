@@ -23,7 +23,8 @@
                             string="Check System Status" 
                             type="object" 
                             class="btn-outline-info"
-                            groups="base.group_user"/>
+                            groups="base.group_user"
+                            invisible="1"/>
                 </xpath>
             </field>
         </record>
